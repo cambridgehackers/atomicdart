@@ -9,6 +9,11 @@ class Rule {
   Rule(this.name, this.guard, this.body) {}
 }
 
+class guard {
+  final Guard guard;
+  guard(this.guard);
+}
+
 class Module {
   var name;
   list<Rule> rules;
@@ -88,12 +93,15 @@ class Reg<T> {
   }
 }
 
-class FIFO1<T> {
+class FIFO1<T> extends Module {
   Reg<T> val;
   Reg<bool> full;
 
-  FIFO1() : full = new Reg<bool>(false) {}
+  FIFO1(name)
+      : super(name),
+        full = new Reg<bool>(false) {}
 
+  @guard(() => !full.val)
   void enq(T v) {
     if (!full) {
       val.val = v;
@@ -101,6 +109,7 @@ class FIFO1<T> {
     }
   }
 
+  @guard(() => full.val)
   T first() {
     if (full.val)
       return val.val;
@@ -108,8 +117,9 @@ class FIFO1<T> {
       return null;
   }
 
+  @guard(() => full.val)
   void deq() {
-    if (full) {
+    if (full.val) {
       full.val = false;
     }
   }
