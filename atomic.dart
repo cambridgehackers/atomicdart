@@ -1,31 +1,3 @@
-class Reg<T> {
-  T get val => _val;
-  void set val(T newval) {
-    _shadow = newval;
-  }
-
-  T _val;
-  T _shadow;
-  Reg(T val) {
-    this._val = val;
-    this._shadow = val;
-    if (themodule != null) {
-      // this is a hack -- we should be able to walk the class definition to find the state elements
-      themodule.registers.add(this);
-    }
-  }
-  T read() {
-    return val;
-  }
-
-  void update() {
-    if (this._val != this._shadow) {
-      this._val = this._shadow;
-      print("updated to $_val");
-    }
-  }
-}
-
 var themodule;
 typedef bool Guard();
 typedef void Body();
@@ -84,6 +56,34 @@ class Module {
     while (!idle && !finished) {
       idle = true;
       step();
+    }
+  }
+}
+
+class Reg<T> {
+  T get val => _val;
+  void set val(T newval) {
+    _shadow = newval;
+  }
+
+  T _val;
+  T _shadow;
+  Reg(T val) {
+    this._val = val;
+    this._shadow = val;
+    if (themodule != null) {
+      // this is a hack -- we should be able to walk the class definition to find the state elements
+      themodule.registers.add(this);
+    }
+  }
+  T read() {
+    return val;
+  }
+
+  void update() {
+    if (this._val != this._shadow) {
+      this._val = this._shadow;
+      print("updated to $_val");
     }
   }
 }
