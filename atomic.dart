@@ -88,3 +88,32 @@ class Module {
   }
 }
 
+class FIFO1<T> {
+  Reg<T> val;
+  Reg<bool> full;
+
+  FIFO1() : full = new Reg<bool>(false) {}
+
+  void enq(T v) {
+    if (!full) {
+      val.val = v;
+      full.val = true;
+    }
+  }
+
+  T first() {
+    if (full.val)
+      return val.val;
+    else
+      return null;
+  }
+
+  void deq() {
+    if (full) {
+      full.val = false;
+    }
+  }
+
+  bool notEmpty() => full.val;
+  bool notFull() => !full.val;
+}
