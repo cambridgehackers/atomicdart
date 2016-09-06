@@ -14,23 +14,22 @@ class guard {
   guard(this.guard);
 }
 
+
 class Module {
   var name;
-  list<Rule> rules;
-  list<Register> registers;
   var idle = true;
   var finished = false;
+  static list<Rule> rules = [];
+  static list<Register> registers = [];
 
   Module(this.name) {
-    rules = [];
-    registers = [];
-    themodule = this;
     idle = false;
-    print("set themodule");
   }
 
   void addRule(name, Guard guard, Body body) {
     rules.add(new Rule(name, guard, body));
+    var length = rules.length;
+    print("addRule $name, now $length rules");
   }
 
   void finish() {
@@ -76,10 +75,8 @@ class Reg<T> {
   Reg(T val) {
     this._val = val;
     this._shadow = val;
-    if (themodule != null) {
-      // this is a hack -- we should be able to walk the class definition to find the state elements
-      themodule.registers.add(this);
-    }
+    // this is a hack -- we should be able to walk the class definition to find the state elements
+    Module.registers.add(this);
   }
   T read() {
     return val;
@@ -99,6 +96,7 @@ class FIFO1<T> extends Module {
 
   FIFO1(name)
       : super(name),
+        val = new Reg<T>(0),
         full = new Reg<bool>(false) {}
 
   @guard(() => !full.val)
