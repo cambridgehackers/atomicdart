@@ -21,7 +21,7 @@ class Echo extends Module {
     });
   }
 
-  @guard(() => delay.notFull())
+  @guard("m.delay.notFull()")
   void say(int x) {
     delay.enq(x);
   }
@@ -55,5 +55,6 @@ class EchoTestbench extends Module {
 
 void main() {
   EchoTestbench tb = new EchoTestbench();
+  tb.describeModules();
   tb.run();
 }
