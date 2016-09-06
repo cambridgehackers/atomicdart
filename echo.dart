@@ -47,7 +47,9 @@ class EchoTestbench extends Module {
     echo.indication = indication;
 
     addRule("startup", () => !ran.val, () {
-      echo.say(22);
+      // use a "function expression invocation" rather than a "method invocation" to test the analyzer
+      var says = [echo.say];
+      says[0](22);
       ran.val = true;
     });
   }

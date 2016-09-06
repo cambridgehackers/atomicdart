@@ -52,3 +52,16 @@ class _ErrorCollector extends AnalysisErrorListener {
 
   void onError(AnalysisError error) => _errors.add(error);
 }
+
+class MyAstVisitor extends GeneralizingASTVisitor<Object> {
+      MyAstVisitor() : super() {}
+
+      Object visitFunctionExpressionInvocation(n) {
+         print("visitFunctionExpressionInvocation $n");
+	 return super.visitFunctionExpressionInvocation(n);
+      }
+      Object visitMethodInvocation(n) {
+         print("visitMethodInvocation $n");
+	 return super.visitMethodInvocation(n);
+      }
+}

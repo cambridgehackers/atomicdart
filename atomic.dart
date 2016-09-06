@@ -77,8 +77,10 @@ class Module {
     print("reflection.location is ${function.location}");
     print("reflection.location is ${function.location.sourceUri}");
     print("reflection function.source is ${function.source}");
-    var cu = parseDartLambdaString("body ${function.source}", function.location.sourceUri.path);
+    var cu = parseDartLambdaString("void body ${function.source}", function.location.sourceUri.path);
     print("compilation unit $cu");
+    var visitor = new MyAstVisitor();
+    var v = visitor.visitCompilationUnit(cu);
   }
 
   static void describeModules() {
