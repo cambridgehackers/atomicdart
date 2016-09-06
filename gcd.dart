@@ -7,8 +7,7 @@ class Gcd extends Module {
     n = new Reg<int>(_n);
     m = new Reg<int>(_m);
 
-    addRule("swap", () => (n.val > m.val && m.val != 0),
-      () {
+    addRule("swap", () => (n.val > m.val && m.val != 0), () {
       n.val = m.val;
       m.val = n.val;
     });
@@ -16,8 +15,7 @@ class Gcd extends Module {
     addRule("sub", () => (n.val <= m.val && m.val != 0),
         () => m.val = m.val - n.val);
 
-    addRule("result", () => m.val == 0,
-      () {
+    addRule("result", () => m.val == 0, () {
       var gcd = n.val;
       print("Gcd Result: $gcd");
       finish();
