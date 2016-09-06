@@ -14,7 +14,6 @@ class guard {
   guard(this.guard);
 }
 
-
 class Module {
   var name;
   var idle = true;
@@ -72,7 +71,8 @@ class Reg<T> {
 
   T _val;
   T _shadow;
-  Reg(T val) {
+  final name;
+  Reg(T val, [name = "Reg"]) : this.name = name {
     this._val = val;
     this._shadow = val;
     // this is a hack -- we should be able to walk the class definition to find the state elements
@@ -85,7 +85,7 @@ class Reg<T> {
   void update() {
     if (this._val != this._shadow) {
       this._val = this._shadow;
-      print("updated to $_val");
+      print("updated $name to $_val");
     }
   }
 }
@@ -96,12 +96,12 @@ class FIFO1<T> extends Module {
 
   FIFO1(name)
       : super(name),
-        val = new Reg<T>(0),
-        full = new Reg<bool>(false) {}
+        val = new Reg<T>(0, "FIFO1.val"),
+        full = new Reg<bool>(false, "FIFO1.full") {}
 
   @guard(() => !full.val)
   void enq(T v) {
-    if (!full) {
+    if (!full.val) {
       val.val = v;
       full.val = true;
     }
@@ -123,5 +123,6 @@ class FIFO1<T> extends Module {
   }
 
   bool notEmpty() => full.val;
+
   bool notFull() => !full.val;
 }
