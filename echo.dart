@@ -55,6 +55,6 @@ class EchoTestbench extends Module {
 
 void main() {
   EchoTestbench tb = new EchoTestbench();
-  tb.describeModules();
+  Module.describeModules();
   tb.run();
 }

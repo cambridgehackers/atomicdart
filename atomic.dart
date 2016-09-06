@@ -59,7 +59,7 @@ class Module {
       }
   }
 
-  void describeModules() {
+  static void describeModules() {
     for (var moditer = modules.iterator; moditer.moveNext();) {
       var module = moditer.current;
       var moduleMirror = reflect(module);
