@@ -21,7 +21,7 @@ class Echo extends Module {
     });
   }
 
-  @guard("m.delay.notFull()")
+  @guard("delay.notFull()")
   void say(int x) {
     delay.enq(x);
   }
