@@ -1,4 +1,5 @@
 import "dart:mirrors";
+import "analyzer.dart";
 
 var themodule;
 typedef bool Guard();
@@ -17,9 +18,9 @@ class guard {
 }
 
 class GuardedMethod {
-    final method;
-    final Guard guard;
-    GuardedMethod(this.method, [this.guard = (() => true)]);
+  final method;
+  final Guard guard;
+  GuardedMethod(this.method, [this.guard = (() => true)]);
 }
 
 class Module {
@@ -30,12 +31,13 @@ class Module {
   static list<Rule> rules = [];
   static list<Register> registers = [];
 
-  Module(this.name) {
+  Module([this.name = "Module"]) {
     idle = false;
     modules.add(this);
   }
 
   void addRule(name, Guard guard, Body body) {
+    describeObject(body);
     rules.add(new Rule(name, guard, body));
     var length = rules.length;
     print("addRule $name, now $length rules");
@@ -63,6 +65,20 @@ class Module {
         Reg reg = iter.current;
         reg.update();
       }
+  }
+
+  static void describeObject(o) {
+    var mirror = reflect(o);
+    print("reflection is $mirror");
+    var function = mirror.function;
+    print("reflection.function is $function");
+    print("reflection.function.simpleName is ${function.simpleName}");
+    print("reflection.function.qualifiedName is ${function.qualifiedName}");
+    print("reflection.location is ${function.location}");
+    print("reflection.location is ${function.location.sourceUri}");
+    print("reflection function.source is ${function.source}");
+    var cu = parseDartLambdaString("body ${function.source}", function.location.sourceUri.path);
+    print("compilation unit $cu");
   }
 
   static void describeModules() {
