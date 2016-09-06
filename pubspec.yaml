@@ -1,0 +1,6 @@
+name: atomicdart
+version: 0.1.0
+description: Atomic Dart HDL
+author: Jamey Hicks, John Ankcorn
+dependencies:
+    analyzer_experimental:
