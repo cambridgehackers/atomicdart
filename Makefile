@@ -1,0 +1,4 @@
+
+
+format:
+	dartfmt -w *.dart
