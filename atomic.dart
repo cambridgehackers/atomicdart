@@ -16,6 +16,12 @@ class guard {
   const guard(this.g);
 }
 
+class GuardedMethod {
+    final method;
+    final Guard guard;
+    GuardedMethod(this.method, [this.guard = (() => true)]);
+}
+
 class Module {
   var name;
   var idle = true;
