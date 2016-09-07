@@ -72,6 +72,7 @@ class Module {
     print("reflection is $mirror");
     var function = mirror.function;
     print("reflection.function is $function");
+    print("reflection.function.owner is ${function.owner}");
     print("reflection.function.simpleName is ${function.simpleName}");
     print("reflection.function.qualifiedName is ${function.qualifiedName}");
     print("reflection.location is ${function.location}");
