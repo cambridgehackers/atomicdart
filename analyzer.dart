@@ -46,7 +46,7 @@ class _ErrorCollector extends AnalysisErrorListener {
 
   /// The group of errors collected.
   AnalyzerErrorGroup get group =>
-    new AnalyzerErrorGroup.fromAnalysisErrors(_errors);
+      new AnalyzerErrorGroup.fromAnalysisErrors(_errors);
 
   _ErrorCollector();
 
@@ -54,14 +54,15 @@ class _ErrorCollector extends AnalysisErrorListener {
 }
 
 class MyAstVisitor extends GeneralizingASTVisitor<Object> {
-      MyAstVisitor() : super() {}
+  MyAstVisitor() : super() {}
 
-      Object visitFunctionExpressionInvocation(n) {
-         print("visitFunctionExpressionInvocation $n");
-	 return super.visitFunctionExpressionInvocation(n);
-      }
-      Object visitMethodInvocation(n) {
-         print("visitMethodInvocation $n");
-	 return super.visitMethodInvocation(n);
-      }
+  Object visitFunctionExpressionInvocation(n) {
+    print("visitFunctionExpressionInvocation $n");
+    return super.visitFunctionExpressionInvocation(n);
+  }
+
+  Object visitMethodInvocation(n) {
+    print("visitMethodInvocation $n");
+    return super.visitMethodInvocation(n);
+  }
 }
