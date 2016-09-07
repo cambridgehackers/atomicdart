@@ -11,19 +11,19 @@ class Echo extends Module {
   Echo(var name) : super(name) {
     delay = new FIFO1<int>("delayFifo");
 
-    addRule("afterDelay", () => delay.notEmpty(), () {
-      var val = delay.first();
+    addRule("afterDelay", () => delay.pipeOut.notEmpty(), () {
+      var val = delay.pipeOut.first();
       print("afterDelay: $val");
       if (indication != null) {
         indication.heard(val);
-        delay.deq();
+        delay.pipeOut.deq();
       }
     });
   }
 
-  @guard("delay.notFull()")
+  @guard("delay.pipeIn.notFull()")
   void say(int x) {
-    delay.enq(x);
+    delay.pipeIn.enq(x);
   }
 }
 

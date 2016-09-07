@@ -77,7 +77,8 @@ class Module {
     print("reflection.location is ${function.location}");
     print("reflection.location is ${function.location.sourceUri}");
     print("reflection function.source is ${function.source}");
-    var cu = parseDartLambdaString("void body ${function.source}", function.location.sourceUri.path);
+    var cu = parseDartLambdaString(
+        "void body ${function.source}", function.location.sourceUri.path);
     print("compilation unit $cu");
     var visitor = new MyAstVisitor();
     var v = visitor.visitCompilationUnit(cu);
@@ -137,39 +138,65 @@ class Reg<T> {
   }
 }
 
-class FIFO1<T> extends Module {
-  Reg<T> val;
-  Reg<bool> full;
+class PipeOut<T> {
+  bool notEmpty();
+  T first();
+  void deq();
+}
 
-  FIFO1(name)
-      : super(name),
-        val = new Reg<T>(0, "FIFO1.val"),
-        full = new Reg<bool>(false, "FIFO1.full") {}
+class PipeIn<T> {
+  bool notFull();
+  void enq();
+}
 
-  @guard("!full.val")
-  void enq(T v) {
-    if (!full.val) {
-      val.val = v;
-      full.val = true;
-    }
-  }
-
-  @guard("full.val")
+class _Fifo1PipeOut<T> extends PipeOut<T> {
+  Fifo1<T> _fifo;
+  _Fifo1PipeOut(this._fifo) {}
+  @guard("_fifo._full.val")
   T first() {
-    if (full.val)
-      return val.val;
+    if (_fifo._full.val)
+      return _fifo._val.val;
     else
       return null;
   }
 
-  @guard("full.val")
+  @guard("_fifo._full.val")
   void deq() {
-    if (full.val) {
-      full.val = false;
+    if (_fifo._full.val) {
+      _fifo._full.val = false;
     }
   }
 
-  bool notEmpty() => full.val;
+  bool notEmpty() => _fifo._full.val;
+}
 
-  bool notFull() => !full.val;
+class _Fifo1PipeIn<T> extends PipeIn<T> {
+  Fifo1<T> _fifo;
+  _Fifo1PipeIn(this._fifo) {}
+
+  @guard("!_fifo._full.val")
+  void enq(T v) {
+    if (!_fifo._full.val) {
+      _fifo._val.val = v;
+      _fifo._full.val = true;
+    }
+  }
+
+  bool notFull() => !_fifo._full.val;
+}
+
+class FIFO1<T> extends Module {
+  Reg<T> _val;
+  Reg<bool> _full;
+
+  PipeOut<T> pipeOut;
+  PipeIn<T> pipeIn;
+
+  FIFO1(name)
+      : super(name),
+        _val = new Reg<T>(0, "FIFO1.val"),
+        _full = new Reg<bool>(false, "FIFO1.full") {
+    pipeOut = new _Fifo1PipeOut<T>(this);
+    pipeIn = new _Fifo1PipeIn<T>(this);
+  }
 }
