@@ -8,8 +8,10 @@ class Echo extends Module {
   FIFO1<int> delay;
   EchoIndication indication;
 
-  Echo(var name) : super(name) {
+  Echo(var name) : super(name: name) {
     delay = new FIFO1<int>("delayFifo");
+
+    gsay = new GuardedMethod1<int>(() => delay.pipeIn.notFull, say);
 
     addRule("afterDelay", () => delay.pipeOut.notEmpty(), () {
       var val = delay.pipeOut.gfirst();
@@ -25,10 +27,12 @@ class Echo extends Module {
   void say(int x) {
     delay.pipeIn.genq(x);
   }
+
+  GuardedMethod1<int> gsay;
 }
 
 class EchoIndicationTB extends Module {
-  EchoIndicationTB() : super("EchoIndicationTB") {}
+  EchoIndicationTB() : super(name: "EchoIndicationTB") {}
   void heard(int x) {
     print("EchoIndication.heard $x");
   }
@@ -39,7 +43,7 @@ class EchoTestbench extends Module {
   EchoIndicationTb indication;
   Reg<bool> ran;
   EchoTestbench()
-      : super("EchoTestbench"),
+      : super(name: "EchoTestbench"),
         echo = new Echo("Echo"),
         indication = new EchoIndicationTB(),
         ran = new Reg<bool>(false, "Echo.ran") {
@@ -49,8 +53,9 @@ class EchoTestbench extends Module {
     for (var i = 0; i < 1; i++) {
       addRule("startup", () => !ran.val, () {
         // use a "function expression invocation" rather than a "method invocation" to test the analyzer
-        var says = [echo.say];
-        says[i](22);
+        var says = [echo.gsay];
+        // remove dependence on i for now
+        says[0](22);
         ran.val = true;
       });
     }

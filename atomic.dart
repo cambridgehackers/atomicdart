@@ -5,6 +5,12 @@ var themodule;
 typedef bool Guard();
 typedef void Body();
 
+class Clock {
+  var name;
+  var period;
+  Clock({var this.name, var this.period}) {}
+}
+
 class Rule {
   var name;
   Guard guard;
@@ -30,8 +36,9 @@ class Module {
   static list<Module> modules = [];
   static list<Rule> rules = [];
   static list<Register> registers = [];
+  Clock clock;
 
-  Module([this.name = "Module"]) {
+  Module({this.name: "Module", this.clock: null}) {
     idle = false;
     modules.add(this);
   }
@@ -242,7 +249,7 @@ class FIFO1<T> extends Module {
   PipeIn<T> pipeIn;
 
   FIFO1(name)
-      : super(name),
+      : super(name: name),
         _val = new Reg<T>(0, "FIFO1.val"),
         _full = new Reg<bool>(false, "FIFO1.full") {
     pipeOut = new _Fifo1PipeOut<T>(this);
