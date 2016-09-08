@@ -102,6 +102,15 @@ class Module {
       for (var iter = declarations.keys.iterator; iter.moveNext();) {
         var declMirror = declarations[iter.current];
         print("declMirror $declMirror");
+        //print("declMirror.type ${declMirror.type}");
+        print("declMirror.owner ${declMirror.owner}");
+
+        try {
+          // fetch the value if fetchable
+          var field = moduleMirror.getField(declMirror.simpleName);
+          print("declMirror value $field");
+        } catch (exception, stackTrace) {}
+
         var metadata = declMirror.metadata;
         for (var miter = metadata.iterator; miter.moveNext();) {
           var md = miter.current;
