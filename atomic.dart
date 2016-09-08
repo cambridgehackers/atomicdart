@@ -139,6 +139,31 @@ class Reg<T> {
   }
 }
 
+typedef void Method0();
+typedef void Method1<T>(T v);
+typedef void Method2<T1, T2>(T v);
+
+class GuardedMethod0 {
+  Guard guard;
+  Method0 _method;
+  GuardedMethod0(Guard this.guard, Method this._method) {}
+  void call() => _method(v);
+}
+
+class GuardedMethod1<T> {
+  Guard guard;
+  Method1<T> _method;
+  GuardedMethod1(Guard this.guard, Method1<T> this._method) {}
+  void call(T v) => _method(v);
+}
+
+class GuardedMethod2<T1, T2> {
+  Guard guard;
+  Method2<T1, T2> _method;
+  GuardedMethod2(Guard this.guard, Method2<T1, T2> this._method) {}
+  void call(T1 v1, T2 v2) => _method(v1, v2);
+}
+
 class PipeOut<T> {
   bool notEmpty();
   T first();
