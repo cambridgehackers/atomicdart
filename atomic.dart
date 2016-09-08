@@ -23,12 +23,6 @@ class guard {
   const guard(this.g);
 }
 
-class GuardedMethod {
-  final method;
-  final Guard guard;
-  GuardedMethod(this.method, [this.guard = (() => true)]);
-}
-
 class Module {
   var name;
   var idle = true;
@@ -161,6 +155,12 @@ typedef void Method2<T1, T2>(T v);
 typedef R Value0<R>();
 typedef R Value1<R, T>(T v);
 typedef R Value2<R, T1, T2>(T v);
+
+class GuardedMethod {
+  final method;
+  final Guard guard;
+  GuardedMethod(this.method, [this.guard = (() => true)]);
+}
 
 class GuardedValue0<R> {
   Guard guard;
