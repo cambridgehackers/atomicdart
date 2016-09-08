@@ -142,12 +142,22 @@ class Reg<T> {
 typedef void Method0();
 typedef void Method1<T>(T v);
 typedef void Method2<T1, T2>(T v);
+typedef R Value0<R>();
+typedef R Value1<R, T>(T v);
+typedef R Value2<R, T1, T2>(T v);
+
+class GuardedValue0<R> {
+  Guard guard;
+  Value0<R> _method;
+  GuardedValue0(Guard this.guard, Method this._method) {}
+  R call() => _method();
+}
 
 class GuardedMethod0 {
   Guard guard;
   Method0 _method;
   GuardedMethod0(Guard this.guard, Method this._method) {}
-  void call() => _method(v);
+  void call() => _method();
 }
 
 class GuardedMethod1<T> {
@@ -166,18 +176,29 @@ class GuardedMethod2<T1, T2> {
 
 class PipeOut<T> {
   bool notEmpty();
+
   T first();
   void deq();
+
+  // guarded versions
+  GuardedValue0<T> gfirst;
+  GuardedMethod0 gdeq;
 }
 
 class PipeIn<T> {
   bool notFull();
   void enq();
+
+  // guarded version
+  GuardedMethod1<T> genq;
 }
 
 class _Fifo1PipeOut<T> extends PipeOut<T> {
   Fifo1<T> _fifo;
-  _Fifo1PipeOut(this._fifo) {}
+  _Fifo1PipeOut(this._fifo) {
+    gfirst = new GuardedValue0<T>(() => _fifo._full.val, first);
+    gdeq = new GuardedMethod0(() => _fifo._full.val, deq);
+  }
   @guard("_fifo._full.val")
   T first() {
     if (_fifo._full.val)
@@ -198,7 +219,9 @@ class _Fifo1PipeOut<T> extends PipeOut<T> {
 
 class _Fifo1PipeIn<T> extends PipeIn<T> {
   Fifo1<T> _fifo;
-  _Fifo1PipeIn(this._fifo) {}
+  _Fifo1PipeIn(this._fifo) {
+    genq = new GuardedMethod1<T>(() => !_fifo._full.val, enq);
+  }
 
   @guard("!_fifo._full.val")
   void enq(T v) {

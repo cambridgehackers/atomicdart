@@ -12,18 +12,18 @@ class Echo extends Module {
     delay = new FIFO1<int>("delayFifo");
 
     addRule("afterDelay", () => delay.pipeOut.notEmpty(), () {
-      var val = delay.pipeOut.first();
+      var val = delay.pipeOut.gfirst();
       print("afterDelay: $val");
       if (indication != null) {
         indication.heard(val);
-        delay.pipeOut.deq();
+        delay.pipeOut.gdeq();
       }
     });
   }
 
   @guard("delay.pipeIn.notFull()")
   void say(int x) {
-    delay.pipeIn.enq(x);
+    delay.pipeIn.genq(x);
   }
 }
 
@@ -46,12 +46,14 @@ class EchoTestbench extends Module {
     // connect echo indication
     echo.indication = indication;
 
-    addRule("startup", () => !ran.val, () {
-      // use a "function expression invocation" rather than a "method invocation" to test the analyzer
-      var says = [echo.say];
-      says[0](22);
-      ran.val = true;
-    });
+    for (var i = 0; i < 1; i++) {
+      addRule("startup", () => !ran.val, () {
+        // use a "function expression invocation" rather than a "method invocation" to test the analyzer
+        var says = [echo.say];
+        says[i](22);
+        ran.val = true;
+      });
+    }
   }
 }
 
