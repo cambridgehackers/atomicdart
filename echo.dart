@@ -23,7 +23,10 @@ class Echo extends Module {
     });
   }
 
-  @guard("delay.pipeIn.notFull()")
+  static bool sayGuard(self) => self.delay.pipeIn.notFull;
+
+  @guard("delay.pipeIn.notFull")
+  @guard(sayGuard)
   void say(int x) {
     delay.pipeIn.genq(x);
   }
@@ -42,6 +45,7 @@ class EchoTestbench extends Module {
   Echo echo;
   EchoIndicationTb indication;
   Reg<bool> ran;
+  var sayvector;
   EchoTestbench()
       : super(name: "EchoTestbench"),
         echo = new Echo("Echo"),
@@ -49,13 +53,13 @@ class EchoTestbench extends Module {
         ran = new Reg<bool>(false, "Echo.ran") {
     // connect echo indication
     echo.indication = indication;
+    sayvector = [echo.gsay];
 
     for (var i = 0; i < 1; i++) {
       addRule("startup", () => !ran.val, () {
         // use a "function expression invocation" rather than a "method invocation" to test the analyzer
-        var says = [echo.gsay];
         // remove dependence on i for now
-        says[0](22);
+        sayvector[0](22);
         ran.val = true;
       });
     }
