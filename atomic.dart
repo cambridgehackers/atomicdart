@@ -1,5 +1,6 @@
 import "dart:mirrors";
 import "analyzer.dart";
+import "verilog.dart";
 
 var themodule;
 typedef bool Guard();
@@ -27,14 +28,17 @@ class Module {
   var name;
   var idle = true;
   var finished = false;
+  list<Reg> registers = [];
   static list<Module> modules = [];
   static list<Rule> rules = [];
-  static list<Register> registers = [];
+  static list<Reg> allregisters = [];
   Clock clock;
 
   Module({this.name: "Module", this.clock: null}) {
     idle = false;
     modules.add(this);
+    themodule = this;
+    print("Module $name");
   }
 
   void addRule(name, Guard guard, Body body) {
@@ -62,13 +66,13 @@ class Module {
       }
     }
     if (!idle)
-      for (var iter = registers.iterator; iter.moveNext();) {
+      for (var iter = allregisters.iterator; iter.moveNext();) {
         Reg reg = iter.current;
         reg.update();
       }
   }
 
-  static void describeObject(o) {
+  void describeObject(o) {
     var mirror = reflect(o);
     print("reflection is $mirror");
     var function = mirror.function;
@@ -82,7 +86,7 @@ class Module {
     var cu = parseDartLambdaString(
         "void body ${function.source}", function.location.sourceUri.path);
     print("compilation unit $cu");
-    var visitor = new MyAstVisitor();
+    var visitor = new MyAstVisitor(this);
     var v = visitor.visitCompilationUnit(cu);
   }
 
@@ -114,6 +118,16 @@ class Module {
     }
   }
 
+  void emitVerilog() {
+    var vm = new VerilogModule(this.name);
+    for (var regiter = registers.iterator; regiter.moveNext(); ) {
+      var reg = regiter.current;
+      print("register ${reg.name}");
+      vm.registers.add(new VerilogRegister(reg.name, reg.width));
+    }
+    vm.emitVerilog();
+  }
+
   void run() {
     while (!idle && !finished) {
       idle = true;
@@ -131,11 +145,14 @@ class Reg<T> {
   T _val;
   T _shadow;
   final name;
-  Reg(T val, [name = "Reg"]) : this.name = name {
+  final int width;
+  Reg(T val, [this.width=32, this.name = "Reg"]) {
     this._val = val;
     this._shadow = val;
     // this is a hack -- we should be able to walk the class definition to find the state elements
-    Module.registers.add(this);
+    Module.allregisters.add(this);
+    if (themodule != null)
+      themodule.registers.add(this);
   }
   T read() {
     return val;
