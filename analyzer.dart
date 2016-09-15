@@ -1,3 +1,4 @@
+import 'dart:mirrors';
 import 'package:path/path.dart' as pathos;
 
 import 'package:analyzer_experimental/src/error.dart';
@@ -12,6 +13,8 @@ export 'package:analyzer_experimental/src/error.dart';
 export 'package:analyzer_experimental/src/generated/ast.dart';
 export 'package:analyzer_experimental/src/generated/error.dart';
 export 'package:analyzer_experimental/src/generated/utilities_dart.dart';
+
+var analyzerVerbose = false;
 
 CompilationUnit parseDartLambdaString(String contents, String path) {
   var errorCollector = new _ErrorCollector();
@@ -54,8 +57,46 @@ class _ErrorCollector extends AnalysisErrorListener {
 }
 
 class MyAstVisitor extends GeneralizingASTVisitor<Object> {
-  MyAstVisitor() : super() {}
+  var module;
+  MyAstVisitor(this.module) : super() {}
 
+  Object visitPrefixedIdentifier(PrefixedIdentifier n) {
+    print("visitPrefixedIdentifier $n ${n.prefix} ${n.identifier}");
+    var moduleMirror = reflect(this.module);
+    if (analyzerVerbose) print("    moduleMirror $moduleMirror");
+    Symbol symbol = new Symbol(n.prefix.name);
+    var decl = moduleMirror.getField(symbol);
+    if (analyzerVerbose) print("    prefix decl $decl");
+    symbol = new Symbol(n.identifier.name);
+    var field = decl.getField(symbol);
+    if (analyzerVerbose) print("           field $field ${field.type}");
+    if (analyzerVerbose) print("           field.reflectee ${field.reflectee} ${field.reflectee.runtimeType}");
+    try {
+      print("           field.reflectee.guard ${field.reflectee.guard}");
+    } catch (e) {
+    }
+
+    return super.visitFunctionExpressionInvocation(n);
+  }
+
+  Object visitIndexExpression(IndexExpression n) {
+    print("visitIndexExpression $n ${n.target} ${n.index}");
+    var moduleMirror = reflect(this.module);
+    if (analyzerVerbose) print("    moduleMirror $moduleMirror");
+    Symbol symbol = new Symbol(n.target.name);
+    var decl = moduleMirror.getField(symbol);
+    print("    target $decl ${decl.reflectee}");
+    var field = decl.reflectee[n.index.value];
+    if (analyzerVerbose) print("           field $field ${field.type}");
+    if (analyzerVerbose) print("           field.reflectee ${field.reflectee} ${field.reflectee.runtimeType}");
+    try {
+      print("           field.reflectee.guard ${field.reflectee.guard}");
+    } catch (e) {
+    }
+
+    return super.visitFunctionExpressionInvocation(n);
+  }
+  
   Object visitFunctionExpressionInvocation(n) {
     print("visitFunctionExpressionInvocation $n");
     return super.visitFunctionExpressionInvocation(n);
