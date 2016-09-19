@@ -16,7 +16,7 @@ class VerilogRegister {
   String name;
   int width;
   VerilogRegister(this.name, [this.width=1]);
-  void emitDeclaration() {
+  String emitDeclaration() {
     String widthspec = "";
     if (width > 1)
       widthspec = "[$width]";

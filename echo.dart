@@ -13,7 +13,7 @@ class Echo extends Module {
 
     gsay = new GuardedMethod1<int>(() => delay.pipeIn.notFull, say);
 
-    addRule("afterDelay", () => delay.pipeOut.notEmpty(), () {
+    action("afterDelay", () => delay.pipeOut.notEmpty(), () {
       var val = delay.pipeOut.gfirst();
       print("afterDelay: $val");
       if (indication != null) {
@@ -56,7 +56,7 @@ class EchoTestbench extends Module {
     sayvector = [echo.gsay];
 
     for (var i = 0; i < 1; i++) {
-      addRule("startup", () => !ran.val, () {
+      action("startup", () => !ran.val, () {
         // use a "function expression invocation" rather than a "method invocation" to test the analyzer
         // remove dependence on i for now
         sayvector[0](22);

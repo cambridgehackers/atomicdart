@@ -20,7 +20,7 @@ class Rule {
 }
 
 class guard {
-  final Guard g;
+  final g; // either a static function or a string
   const guard(this.g);
 }
 
@@ -28,10 +28,10 @@ class Module {
   var name;
   var idle = true;
   var finished = false;
-  list<Reg> registers = [];
-  static list<Module> modules = [];
-  static list<Rule> rules = [];
-  static list<Reg> allregisters = [];
+  List<Reg> registers = [];
+  static List<Module> modules = [];
+  static List<Rule> rules = [];
+  static List<Reg> allregisters = [];
   Clock clock;
 
   Module({this.name: "Module", this.clock: null}) {
@@ -41,11 +41,11 @@ class Module {
     print("Module $name");
   }
 
-  void addRule(name, Guard guard, Body body) {
+  void action(name, Guard guard, Body body) {
     describeObject(body);
     rules.add(new Rule(name, guard, body));
     var length = rules.length;
-    print("addRule $name, now $length rules");
+    print("action $name, now $length rules");
   }
 
   void finish() {
@@ -83,11 +83,10 @@ class Module {
     print("reflection.location is ${function.location}");
     print("reflection.location is ${function.location.sourceUri}");
     print("reflection function.source is ${function.source}");
-    var cu = parseDartLambdaString(
-        "void body ${function.source}", function.location.sourceUri.path);
+    var cu = parseDartLambdaString("void body ${function.source}", function.location.sourceUri.path);
     print("compilation unit $cu");
     var visitor = new MyAstVisitor(this);
-    var v = visitor.visitCompilationUnit(cu);
+    visitor.visitCompilationUnit(cu);
   }
 
   static void describeModules() {
@@ -168,28 +167,29 @@ class Reg<T> {
 
 typedef void Method0();
 typedef void Method1<T>(T v);
-typedef void Method2<T1, T2>(T v);
+typedef void Method2<T1, T2>(T1 v1, T2 v2);
 typedef R Value0<R>();
 typedef R Value1<R, T>(T v);
-typedef R Value2<R, T1, T2>(T v);
+typedef R Value2<R, T1, T2>(T1 v1, T2 v2);
 
 class GuardedMethod {
   final method;
   final Guard guard;
-  GuardedMethod(this.method, [this.guard = (() => true)]);
+  static final Guard defaultGuard = (() => true);
+  GuardedMethod(this.method, Guard guard) : guard = ((guard != null) ? guard : defaultGuard);
 }
 
 class GuardedValue0<R> {
   Guard guard;
   Value0<R> _method;
-  GuardedValue0(Guard this.guard, Method this._method) {}
+  GuardedValue0(Guard this.guard, Value0<R> this._method) {}
   R call() => _method();
 }
 
 class GuardedMethod0 {
   Guard guard;
   Method0 _method;
-  GuardedMethod0(Guard this.guard, Method this._method) {}
+  GuardedMethod0(Guard this.guard, Method0 this._method) {}
   void call() => _method();
 }
 
@@ -207,7 +207,7 @@ class GuardedMethod2<T1, T2> {
   void call(T1 v1, T2 v2) => _method(v1, v2);
 }
 
-class PipeOut<T> {
+abstract class PipeOut<T> {
   bool notEmpty();
 
   T first();
@@ -218,7 +218,7 @@ class PipeOut<T> {
   GuardedMethod0 gdeq;
 }
 
-class PipeIn<T> {
+abstract class PipeIn<T> {
   bool notFull();
   void enq();
 
@@ -276,7 +276,7 @@ class FIFO1<T> extends Module {
 
   FIFO1(name)
       : super(name: name),
-        _val = new Reg<T>(0, "FIFO1.val"),
+        _val = new Reg<T>(null, "FIFO1.val"),
         _full = new Reg<bool>(false, "FIFO1.full") {
     pipeOut = new _Fifo1PipeOut<T>(this);
     pipeIn = new _Fifo1PipeIn<T>(this);

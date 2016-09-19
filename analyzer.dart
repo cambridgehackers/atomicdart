@@ -1,24 +1,25 @@
 import 'dart:mirrors';
 import 'package:path/path.dart' as pathos;
 
-import 'package:analyzer_experimental/src/error.dart';
-import 'package:analyzer_experimental/src/generated/ast.dart';
-import 'package:analyzer_experimental/src/generated/error.dart';
-import 'package:analyzer_experimental/src/generated/parser.dart';
-import 'package:analyzer_experimental/src/generated/scanner.dart';
-import 'package:analyzer_experimental/src/generated/source_io.dart';
-import 'package:analyzer_experimental/src/string_source.dart';
+import 'package:analyzer/src/error.dart';
+import 'package:analyzer/src/generated/ast.dart';
+import 'package:analyzer/src/generated/error.dart';
+import 'package:analyzer/src/generated/parser.dart';
+import 'package:analyzer/src/dart/scanner/reader.dart';
+import 'package:analyzer/src/dart/scanner/scanner.dart';
+import 'package:analyzer/src/generated/source_io.dart';
+import 'package:analyzer/src/string_source.dart';
 
-export 'package:analyzer_experimental/src/error.dart';
-export 'package:analyzer_experimental/src/generated/ast.dart';
-export 'package:analyzer_experimental/src/generated/error.dart';
-export 'package:analyzer_experimental/src/generated/utilities_dart.dart';
+export 'package:analyzer/src/error.dart';
+export 'package:analyzer/src/generated/ast.dart';
+export 'package:analyzer/src/generated/error.dart';
+export 'package:analyzer/src/generated/utilities_dart.dart';
 
 var analyzerVerbose = false;
 
 CompilationUnit parseDartLambdaString(String contents, String path) {
   var errorCollector = new _ErrorCollector();
-  var sourceFactory = new SourceFactory.con2([new FileUriResolver()]);
+  var sourceFactory = new SourceFactory([new FileUriResolver()]);
 
   var absolutePath = pathos.absolute(path);
   var source = sourceFactory.forUri(pathos.toUri(absolutePath).toString());
@@ -29,7 +30,8 @@ CompilationUnit parseDartLambdaString(String contents, String path) {
     throw new ArgumentError("Source $source doesn't exist");
   }
 
-  var scanner = new StringScanner(source, contents, errorCollector);
+  CharacterReader contentReader = new SubSequenceReader(contents, 0); // fixme delta
+  Scanner scanner = new Scanner(source, contentReader, errorCollector);
   var token = scanner.tokenize();
   var parser = new Parser(source, errorCollector);
   var unit = parser.parseCompilationUnit(token);
@@ -56,7 +58,7 @@ class _ErrorCollector extends AnalysisErrorListener {
   void onError(AnalysisError error) => _errors.add(error);
 }
 
-class MyAstVisitor extends GeneralizingASTVisitor<Object> {
+class MyAstVisitor extends GeneralizingAstVisitor<Object> {
   var module;
   MyAstVisitor(this.module) : super() {}
 

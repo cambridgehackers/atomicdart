@@ -8,16 +8,16 @@ class Gcd extends Module {
     n = new Reg<int>(_n, 32, "N");
     m = new Reg<int>(_m, 32, "M");
 
-    addRule("swap", () => (n.val > m.val && m.val != 0), () {
+    action("swap", () => (n.val > m.val && m.val != 0), () {
       n.val = m.val;
       m.val = n.val;
     });
 
-    addRule("sub", () => (n.val <= m.val && m.val != 0), () {
+    action("sub", () => (n.val <= m.val && m.val != 0), () {
       return m.val = m.val - n.val;
     });
 
-    addRule("result", () => m.val == 0, () {
+    action("result", () => m.val == 0, () {
       var gcd = n.val;
       print("Gcd Result: $gcd");
       finish();
